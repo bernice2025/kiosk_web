@@ -20,14 +20,25 @@
                     </thead>
 
                     <tbody>
-                        <tr v-if="error">
-                            <td colspan="6" style="color:red">
-                                Impossible de charger les données.
+                        <tr v-if="loading">
+                            <td colspan="7" class="state-message loading">
+                                <i class="fa-solid fa-spinner fa-spin"></i>
+                                Chargement des ventes en cours...
+                            </td>
+                        </tr>
+
+                        <tr v-else-if="error">
+                            <td colspan="7" class="state-message error">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                                {{ error }}
                             </td>
                         </tr>
 
                         <tr v-else-if="resultsVentes.length === 0">
-                            <td colspan="6">Aucune donnée disponible.</td>
+                            <td colspan="7" class="state-message empty">
+                                <i class="fa-solid fa-box-open"></i>
+                                Aucune vente trouvée.
+                            </td>
                         </tr>
 
                         <tr 

@@ -1,9 +1,12 @@
 <template>
   <div class="dialog-overlay" @click.self="$emit('closeFacture')" style="font-size: .8rem;">
     <div class="dialog-content">
-      <div class="dialog-header">
-        <h2>Facture N° {{ vente.invoice_number }}</h2>
-        <i class="fa-solid fa-xmark" @click="$emit('closeFacture')"></i>        
+      <div class="logo-style">
+        <img src="/logo.JPG" alt="logo" class="logo" />
+        <i class="fa-solid fa-xmark" @click="$emit('closeFacture')"></i>  
+      </div>
+      <div class="dialog-header logo-header">
+        <h2>Facture N° {{ vente.invoice_number }}</h2>      
       </div>
       <div class="body">
         <div class="client-company">
@@ -290,8 +293,8 @@ export default {
                         margin-bottom: 24px;
                     }
                     thead tr {
-                        background: green;
-                        color: #fff;
+                        background: green !important;
+                        color: #ffffff !important;
                     }
                     thead th {
                         padding: 10px 12px;
@@ -299,6 +302,12 @@ export default {
                         text-transform: uppercase;
                         letter-spacing: 0.8px;
                         font-weight: 600;
+                        border-right: 1px solid rgba(255,255,255,0.2);
+                        background: green !important;
+                        color: #ffffff !important;
+                    }
+                    thead th:last-child {
+                        border-right: none;
                     }
                     tbody tr:nth-child(even) { background: #f7f8fc; }
                     tbody tr:nth-child(odd)  { background: #fff; }
@@ -358,10 +367,24 @@ export default {
                             break-inside: avoid;
                         }
                     }
+                    @media print {
+                        * {
+                            -webkit-print-color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+
+                        thead tr,
+                        thead th {
+                            background: green !important;
+                            color: #ffffff !important;
+                        }
+                    }
                 </style>
             </head>
             <body>
-
+                <div style="text-align:left; margin-bottom: 20px;">
+                    <img src="/logo.JPG" style="width: 150px; height: auto;" />
+                </div>
                 <!-- EN-TÊTE -->
                 <div class="header">
                     <div class="header-left">
@@ -466,4 +489,15 @@ export default {
 }
 </script>
 
-<style scoped src="@/dialog_style.css"></style>
+<style src="@/dialog_style.css" scoped></style>
+
+<style scoped>
+.logo-style {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.logo {
+  width: 120px;
+}
+</style>

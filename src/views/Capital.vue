@@ -82,7 +82,8 @@ export default {
     try {
       await this.fetchAllInjections()
     }catch (e) {
-      this.error = "Impossible de charger les capitals"
+      console.log(e)
+      this.$toast.error(this.$getErrorMessage(e))
     }finally {
       this.loading = false
     }
