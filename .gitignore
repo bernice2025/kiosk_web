@@ -16,7 +16,7 @@ build/
 *.temp
 
 
-src/App.vue
+# src/App.vue
 
 # OS files
 .DS_Store
