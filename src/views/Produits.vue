@@ -1,7 +1,7 @@
 <template>
   <div class="ensemble">
     <div class="filter">
-      <Filter_form />
+      <Filter_form @open="addProductShow = true"  />
     </div>
 
     <div class="tabilation">
@@ -62,21 +62,27 @@
     v-if="editPriceShow"
     @close="closeEditPrice"
   />
+
+  <div class="capital" v-show="addProductShow">
+    <Dialog_produit  @close="addProductShow = false" />
+  </div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from "vuex";
 import Filter_form from "@/components/filter_form.vue";
 import dialog_edit_price from "@/components/dialog_edit_price.vue";
+import Dialog_produit from "@/components/dialog_produit.vue";
 
 export default {
-  components: { Filter_form, dialog_edit_price },
+  components: { Filter_form, dialog_edit_price, Dialog_produit },
 
   data() {
     return {
       loading: true,
       error: null,
       editPriceShow: false,
+      addProductShow: false,
     };
   },
 
