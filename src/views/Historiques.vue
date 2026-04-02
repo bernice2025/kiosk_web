@@ -47,7 +47,7 @@
                         >
                             <td>{{ vente?.created_by?.username || "—" }}</td>
                             <td>{{ vente?.client?.customer_name || "—" }}</td>
-                            <td>{{ formatDate(vente?.date) }}</td>
+                            <td>{{ formatDate(vente?.created_at) }}</td>
                             <td>{{ formatNumber(vente?.payee) }}</td>
                             <td>{{ formatNumber(vente?.prix_total) }}</td>
                             <td class="text-center">
