@@ -128,6 +128,19 @@
                         <i class="fa-solid fa-chevron-right histo-dropdown__arrow-right"></i>
                     </button>
 
+                    <button
+                        class="histo-dropdown__item histo-dropdown__item--delete"
+                        @click="deleteVente(selectedDropdownVente); activeDropdown = null"
+                    >
+                        <span class="histo-dropdown__icon">
+                            <i class="fas fa-trash" style="color: red;"></i>
+                        </span>
+                        <span class="histo-dropdown__text">
+                            <span class="histo-dropdown__title">Supprimer</span>
+                            <span class="histo-dropdown__sub">Supprimer une vente inutile</span>
+                        </span>
+                    </button>
+
                     <div class="histo-dropdown__divider"></div>
 
                     <button 
@@ -312,6 +325,25 @@ export default {
                 params: { id: vente.id },
                 query: { total: vente.prix_total, paye: vente.payee }
             });
+        },
+        deleteVente(vente) {
+            const venteId = vente.id
+            this.loading = true
+
+            axios
+                .delete(`ventes/${venteId}/`, this.headers)
+                .then((response) => {
+                    console.log(response.data)
+                    this.$toast.success('La vente est supprimée avec succès')
+                    this.getData
+                })
+                .catch((error) => {
+                    console.log(error)
+                    this.$toast.error(this.$getErrorMessage(error))
+                })
+                .finally(() => {
+                    this.loading = false
+                })
         },
         envoyerObr(vente) {
             axios
