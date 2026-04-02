@@ -187,7 +187,7 @@ export default {
           montant: this.montantPaye,
           type_paiement: "1", 
           details: "Paiement via formulaire de vente",
-          date: new Date().toISOString(),
+          date: this.date,
           currency: "BIF", 
         };
 
