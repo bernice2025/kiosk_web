@@ -19,6 +19,12 @@
                     <div><i class="fa-solid fa-chevron-right"></i></div>
                 </div>
             </router-link>
+            <router-link to="/historiques" class="routerlink" @click="$emit('closeMenu')">
+                <div class="item">
+                    <div><i class="fa-solid fa-clock-rotate-left"></i>Historiques</div>
+                    <div><i class="fa-solid fa-chevron-right"></i></div>
+                </div>
+            </router-link>
             <router-link to="/capital" class="routerlink" @click="$emit('closeMenu')">
                 <div class="item">
                     <div class="item-2"><i class="fa-solid fa-dollar-sign"></i>Capital</div>
@@ -52,12 +58,6 @@
             <router-link to="/versements" class="routerlink" @click="$emit('closeMenu')">
                 <div class="item">
                     <div><i class="fa-solid fa-file-invoice-dollar"></i>Versements</div>
-                    <div><i class="fa-solid fa-chevron-right"></i></div>
-                </div>
-            </router-link>
-            <router-link to="/historiques" class="routerlink" @click="$emit('closeMenu')">
-                <div class="item">
-                    <div><i class="fa-solid fa-clock-rotate-left"></i>Historiques</div>
                     <div><i class="fa-solid fa-chevron-right"></i></div>
                 </div>
             </router-link>

@@ -61,13 +61,13 @@
         />
       </div>
 
-      <!-- <div class="date">
+      <div class="date">
         <label for="date">Date de la creation de la facture</label>
         <input type="date"
           v-model="date"
           :max="maxDate"
         >
-      </div> -->
+      </div>
 
       <div class="number">
         Quantité: <span>{{ panier.length }}</span>
@@ -94,7 +94,7 @@ export default {
       selectedClientName: "",
       invoiceType: "",
       montantPaye: 0,
-      // date: null,
+      date: "",
       dateToday: null,
       loading: false,
     };
@@ -171,7 +171,7 @@ export default {
       const venteData = {
         client: this.clientUUID,
         invoice_type: this.invoiceType,
-        // date: this.date,
+        date: this.date,
         produits: this.panier.map((p) => ({
           id: p.item.id,
           quantite: p.quantity,
