@@ -2,7 +2,7 @@
   <div class="dialog-overlay" @click.self="$emit('closeFacture')" style="font-size: .8rem;">
     <div class="dialog-content">
       <div class="logo-style">
-        <img src="/logo.JPG" alt="logo" class="logo" />
+        <img src="/logo-hogi-updated.png" alt="logo" class="logo" />
         <i class="fa-solid fa-xmark" @click="$emit('closeFacture')"></i>  
       </div>
       <div class="dialog-header logo-header">
@@ -383,7 +383,7 @@ export default {
             </head>
             <body>
                 <div style="text-align:left; margin-bottom: 20px;">
-                    <img src="/logo.JPG" style="width: 150px; height: auto;" />
+                    <img src="${window.location.origin}/logo-hogi-updated.png" style="width: 150px; height: auto;" />
                 </div>
                 <!-- EN-TÊTE -->
                 <div class="header">

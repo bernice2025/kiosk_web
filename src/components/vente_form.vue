@@ -61,6 +61,14 @@
         />
       </div>
 
+      <!-- <div class="date">
+        <label for="date">Date de la creation de la facture</label>
+        <input type="date"
+          v-model="date"
+          :max="maxDate"
+        >
+      </div> -->
+
       <div class="number">
         Quantité: <span>{{ panier.length }}</span>
         Bif: <span>{{ formatNumber(total) }}</span>
@@ -86,6 +94,8 @@ export default {
       selectedClientName: "",
       invoiceType: "",
       montantPaye: 0,
+      // date: null,
+      dateToday: null,
       loading: false,
     };
   },
@@ -114,6 +124,11 @@ export default {
           .includes(search)
       );
     },
+    maxDate() {
+      const hier = new Date();
+      hier.setDate(hier.getDate() - 1);
+      return hier.toISOString().split('T')[0]; // format YYYY-MM-DD
+    },
   },
 
   methods: {
@@ -138,20 +153,25 @@ export default {
 
     async effectuerVente() {
       if (this.loading) return;
-      if (!this.clientUUID)
-        return this.$toast.error("Veuillez sélectionner un client");
-
-      if (!this.invoiceType)
-        return this.$toast.error("Veuillez choisir un type de facture");
-
-      if (!this.montantPaye || this.montantPaye <= 0)
-        return this.$toast.error("Veuillez indiquer un montant payé valide");
 
       this.loading = true;
+
+      if (this.date) {
+        const dateChoisie = new Date(this.date);
+        const aujourdhui = new Date();
+        aujourdhui.setHours(0, 0, 0, 0); // minuit aujourd'hui
+
+        if (dateChoisie >= aujourdhui) {
+          this.$toast.error("La date de la facture doit être antérieure à aujourd'hui.");
+          this.loading = false;
+          return;
+        }
+      }
 
       const venteData = {
         client: this.clientUUID,
         invoice_type: this.invoiceType,
+        // date: this.date,
         produits: this.panier.map((p) => ({
           id: p.item.id,
           quantite: p.quantity,
@@ -197,7 +217,7 @@ export default {
         });
       } catch (error) {
         console.error("❌ ERREUR API :", error);
-        this.$toast.error("Erreur lors de l'enregistrement");
+        this.$toast.error(this.$getErrorMessage(error))
       } finally {
         this.loading = false;
       }
