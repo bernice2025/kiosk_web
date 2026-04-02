@@ -20,10 +20,11 @@ export default {
     data() {
         return {
             stats: [
-                {icon: 'fas fa-chart-line', title: 'Intérêts', value: null, active: true},
+                {icon: 'fas fa-chart-line', title: 'Balance', value: null, active: true},
+                //{icon: 'fas fa-chart-line', title: 'Intérêts', value: null, active: true},
                 {icon: 'fas fa-coins', title: 'Invest', value: null, active: false},
                 {icon: 'fas fa-shopping-cart', title: 'Ventes', value: null, active: false},
-                {icon: 'fas fa-dollar-sign', title: 'Dettes', value: null, active: false},
+                {icon: 'fas fa-dollar-sign', title: 'TVA', value: null, active: false},
                 {icon: 'fas fa-box', title: 'Produits', value: null, active: false}
             ],
             loading: false
@@ -41,7 +42,8 @@ export default {
                 const kiosks = kiosksResp.data.results[0]?.balance;
                 const injections = injectionsResp.data.totals.montant
 
-                this.stats[0].value = kiosks - injections
+                this.stats[0].value = kiosks
+                //this.stats[0].value = kiosks - injections
             })
             .catch(err => {
                 console.log("ERREUR :", err)
@@ -66,7 +68,7 @@ export default {
                 .get('ventes/', this.headers)
                 .then((res) => {
                     this.stats[2].value = res.data.totals.payee
-                    this.stats[3].value = res.data.totals.dette
+                    this.stats[3].value = res.data.totals.tva
                 })
                 .catch((err) => {console.log("ERREUR VENTES :", err)})
                 .finally(() => {this.loading = false});

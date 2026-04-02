@@ -15,7 +15,7 @@ import Cart from '@/views/Cart.vue'
 import Versements from '@/views/Versements.vue'
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(import.meta.env.PROD ? '/' : '/'),
   routes: [
     { path: '/', name: 'Accueil', component: Accueil, meta: { label: 'Accueil' } },
     { path: '/capital', name: 'Capital', component: Capital, meta: { label: 'Capital' } },
