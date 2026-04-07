@@ -16,18 +16,34 @@
             type="text"
             v-model="clientSearch"
             placeholder="Cherchez un client"
+            @keyup.enter="forceSearch"
           />
         </div>
 
-        <button @click="forceSearch">
-          <i class="fa-solid fa-magnifying-glass"></i>
+        <button 
+          v-if="clientSearch" 
+          @click="clearSearch"
+          title="Réinitialiser"
+          class="btn-clear"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <button 
+          v-else
+          @click="forceSearch"
+          :disabled="!clientSearch.trim()"
+          title="Rechercher"
+        >
+          <i v-if="searchLoading" class="fa-solid fa-spinner fa-spin"></i>
+          <i v-else class="fa-solid fa-magnifying-glass"></i>
         </button>
       </div>
 
-      <div v-if="filteredClients.length > 0" class="results-box">
+      <div v-if="searchResults.length > 0" class="results-box">
         <div
           class="result-item"
-          v-for="client in filteredClients"
+          v-for="client in searchResults"
           :key="client.id"
           @click="selectClient(client)"
         >
@@ -35,8 +51,14 @@
         </div>
       </div>
 
+      <div v-else-if="clientSearch.trim() && !searchLoading && searchResults.length === 0" class="no-results">
+        <i class="fa-solid fa-inbox"></i>
+        <p>Aucun client trouvé</p>
+      </div>
+
       <div v-if="clientUUID" class="selected">
-        Client sélectionné : <strong>{{ selectedClientName }}</strong>
+        <i class="fa-solid fa-check-circle"></i>
+        <span>Client confirmé : <strong>{{ selectedClientName }}</strong></span>
       </div>
 
       <div class="input invoice-select">
@@ -65,7 +87,6 @@
         <label for="date">Date de la creation de la facture</label>
         <input type="date"
           v-model="date"
-          :max="maxDate"
         >
       </div>
 
@@ -85,6 +106,7 @@
 import apiClient from "@/axios";
 import { mapState, mapActions } from "vuex";
 import { toast } from "vue3-toastify";
+import { debounce } from 'lodash';
 
 export default {
   data() {
@@ -97,11 +119,13 @@ export default {
       date: "",
       dateToday: null,
       loading: false,
+      searchLoading: false,
+      searchResults: [],
     };
   },
 
   computed: {
-    ...mapState(["clients", "panier"]),
+    ...mapState(["panier"]),
 
     total() {
       return this.panier.reduce(
@@ -114,28 +138,49 @@ export default {
       return Math.round(this.total * 1.18);
     },
 
-    filteredClients() {
-      if (!this.clientSearch.trim()) return [];
-      const search = this.clientSearch.toLowerCase();
+    // filteredClients() {
+    //   if (!this.clientSearch.trim()) return [];
+    //   const search = this.clientSearch.toLowerCase();
 
-      return this.clients.results?.filter((client) =>
-        (client.name || client.customer_name || "")
-          .toLowerCase()
-          .includes(search)
-      );
-    },
-    maxDate() {
-      const hier = new Date();
-      hier.setDate(hier.getDate() - 1);
-      return hier.toISOString().split('T')[0]; // format YYYY-MM-DD
-    },
+    //   return this.clients.results?.filter((client) =>
+    //     (client.name || client.customer_name || "")
+    //       .toLowerCase()
+    //       .includes(search)
+    //   );
+    // },
+
+    // maxDate() {
+    //   const hier = new Date();
+    //   hier.setDate(hier.getDate() - 1);
+    //   return hier.toISOString().split('T')[0]; // format YYYY-MM-DD
+    // },
+  },
+  watch: {
+    clientSearch(val) {
+      if (!val.trim()) {
+        this.searchResults = [];
+        return;
+      }
+      this.rechercherClient(val);
+    }
   },
 
   methods: {
-    ...mapActions(["fetchClients", "fetchVentes"]),
+    ...mapActions(["fetchVentes"]),
 
     formatNumber(n) {
       return (n || 0).toLocaleString("fr-FR");
+    },
+    async rechercherClient(query) {
+      this.searchLoading = true;
+      try {
+        const response = await apiClient.get(`clients/?search=${encodeURIComponent(query)}`);
+        this.searchResults = response.data.results || response.data;
+      } catch (e) {
+        toast.error("Erreur lors de la recherche client");
+      } finally {
+        this.searchLoading = false;
+      }
     },
 
     forceSearch() {
@@ -144,11 +189,18 @@ export default {
       }
     },
 
+    clearSearch() {
+      this.clientSearch = "";
+      this.searchResults = [];
+      this.clientUUID = "";
+      this.selectedClientName = "";
+    },
+
     selectClient(client) {
       this.clientUUID = client.uuid || client.id;
-      this.selectedClientName =
-        client.name || client.customer_name || "Client inconnu";
+      this.selectedClientName = client.name || client.customer_name || "Client inconnu";
       this.clientSearch = this.selectedClientName;
+      this.searchResults = [];  // ← ferme la liste
     },
 
     async effectuerVente() {
@@ -156,17 +208,17 @@ export default {
 
       this.loading = true;
 
-      if (this.date) {
-        const dateChoisie = new Date(this.date);
-        const aujourdhui = new Date();
-        aujourdhui.setHours(0, 0, 0, 0); // minuit aujourd'hui
+      // if (this.date) {
+      //   const dateChoisie = new Date(this.date);
+      //   const aujourdhui = new Date();
+      //   aujourdhui.setHours(0, 0, 0, 0); // minuit aujourd'hui
 
-        if (dateChoisie >= aujourdhui) {
-          this.$toast.error("La date de la facture doit être antérieure à aujourd'hui.");
-          this.loading = false;
-          return;
-        }
-      }
+      //   if (dateChoisie >= aujourdhui) {
+      //     this.$toast.error("La date de la facture doit être antérieure à aujourd'hui.");
+      //     this.loading = false;
+      //     return;
+      //   }
+      // }
 
       const venteData = {
         client: this.clientUUID,
@@ -223,16 +275,18 @@ export default {
       }
     },
   },
-
-  async mounted() {
-    try {
-      if (!this.clients.results?.length) {
-        await this.fetchClients();
-      }
-    } catch (e) {
-      toast.error("Impossible de charger les clients");
-    }
+  created() {
+    this.rechercherClient = debounce(this.rechercherClient, 300);
   },
+  // async mounted() {
+  //   try {
+  //     if (!this.clients.results?.length) {
+  //       await this.fetchClients();
+  //     }
+  //   } catch (e) {
+  //     toast.error("Impossible de charger les clients");
+  //   }
+  // },
 };
 </script>
 
@@ -249,6 +303,8 @@ export default {
   width: 100%;
   border: 1px solid #ccc;
   border-radius: 6px;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .search {
@@ -258,34 +314,106 @@ export default {
 
 .search input {
   width: 100%;
-  padding: 10px;
+  padding: 10px 12px;
   border: none;
-  background: #eee;
+  background: transparent;
+  font-size: 0.95em;
+  outline: none;
+}
+
+.search input::placeholder {
+  color: #999;
 }
 
 .recherche button {
   width: 10%;
   border: none;
-  background: #eee;
+  background: transparent;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+  color: #666;
+}
+
+.recherche button:hover:not(:disabled) {
+  background-color: #f5f5f5;
+}
+
+.recherche button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-clear {
+  color: #e74c3c;
+}
+
+.btn-clear:hover {
+  background-color: #ffe6e0 !important;
 }
 
 .results-box {
-  border: 1px solid gray;
-  height: 30px;
+  border: 1px solid #ddd;
+  max-height: 200px;
   overflow-y: auto;
-  padding: 15px;
-  border-radius: 5px;
+  padding: 8px 0;
+  border-radius: 6px;
+  background: white;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  margin-top: 4px;
 }
 
 .result-item {
-  padding: 10px;
-  margin-top: -20px;
+  padding: 10px 15px;
   cursor: pointer;
+  transition: background-color 0.15s;
+  border-left: 3px solid transparent;
 }
 
 .result-item:hover {
-  background: #f2f2f2;
+  background: #f8f9fa;
+  border-left-color: #3498db;
+}
+
+.no-results {
+  text-align: center;
+  padding: 20px;
+  color: #999;
+  border: 1px dashed #ddd;
+  border-radius: 6px;
+  background: #fafafa;
+  margin-top: 4px;
+}
+
+.no-results i {
+  font-size: 1.5em;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.no-results p {
+  margin: 0;
+  font-size: 0.9em;
+}
+
+.selected {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 15px;
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  border-radius: 6px;
+  color: #155724;
+  font-weight: 500;
+  margin-top: 10px;
+}
+
+.selected i {
+  color: #28a745;
+  font-size: 1.2em;
 }
 
 .invoice-select,
@@ -293,6 +421,14 @@ export default {
   margin-top: 10px;
   display: flex;
   flex-direction: column;
+  gap: 8px;
+}
+
+.invoice-select label,
+.invoice-ref label {
+  font-weight: 500;
+  color: #333;
+  font-size: 0.95em;
 }
 
 .fis {
@@ -305,9 +441,13 @@ export default {
 
 .invoice-select select,
 .invoice-ref input {
-  /* padding: 8px; */
+  padding: 12px;
   border-radius: 6px;
   border: 1px solid #ccc;
+  font-size: 1em;
+  width: 100%;
+  height: auto;
+  min-height: 42px;
 }
 
 .bouton {

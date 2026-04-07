@@ -16,6 +16,11 @@
                     <input type="number" id="montant" class="input" placeholder="Montant" v-model="montant">
                 </div>
 
+                <div>
+                    <label for="date">Date du paiement</label>
+                    <input type="date" v-model="date" class="input">
+                </div>
+
                 <div class="currency">
                     <label for="currency">Currency</label>
                     <select id="currency" v-model="currency">
@@ -67,6 +72,7 @@ export default {
     data() {
         return {
             montant: "",
+            date: "",
             currency: "BIF",
             details: "",
             type_paiement: "",
@@ -90,12 +96,10 @@ export default {
             const form = {
                 montant: Number(this.montant),
                 currency: this.currency,
+                ...(this.date ? { date: this.date } : {}),
                 details: this.details,
-
                 type_paiement: this.type_paiement,
-
                 autres_type_paiement: this.autres_types || null,
-
                 vente: this.$route.params.id
             };
 
@@ -120,6 +124,7 @@ export default {
                 })
                 .catch((err) => {
                     console.error("Error:", err.response?.data);
+                    this.$toast.error(this.$getErrorMessage(err))
                 })
                 .finally(() => {
                     this.loading = false;

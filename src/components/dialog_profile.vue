@@ -52,7 +52,7 @@
             </div>
             <div class="info-item">
               <span class="label">Assujetti à la TVA:</span>
-              <span class="value">{{ kiosk.vat_taxpayer }}</span>
+              <span class="value">{{ kiosk.vat_taxpayer == 1 ? "Oui" : "Non" }}</span>
             </div>
             <div class="info-item">
               <span class="label">Centre fiscal:</span>

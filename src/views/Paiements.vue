@@ -27,7 +27,7 @@
             <tr v-else v-for="(payment, index) in resultsPayments" :key="index">
               <td>{{ formatNumber(payment.montant) }} {{ payment.currency }}</td>
               <td>{{ payment.details }}</td>
-              <td>{{ formatDate(payment.created_at) }}</td>
+              <td>{{ formatDate(payment.date) }}</td>
               <td>{{ payment.type_paiement }}</td>
               <td>{{ payment.created_by.username }}</td>
             </tr>
@@ -41,6 +41,7 @@
         @close="dialog_show = false" 
         @paiement-cree="handlePaiementCree" 
         :venteId="venteId"
+        @paymentSuccess="getData"
       />
     </div>
   </div>

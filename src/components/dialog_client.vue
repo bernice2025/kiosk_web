@@ -1,9 +1,9 @@
 <template>
-    <div class="layout">
+    <div class="layout" @click.self="$emit('close')">
         <div class="card-body">
             <div class="legend">
                 <div class="ajout">
-                    <legend>Ajouter une clientèle</legend>
+                    <legend>{{ isEdit ? 'Modifier les infos du client' : 'Ajouter une clientèle' }}</legend>
                 </div>
                 <i class="fa-solid fa-xmark" @click="$emit('close')"></i>
             </div>
@@ -49,6 +49,12 @@
 import apiClient from "@/axios";  // important !
 
 export default {
+    props: {
+        clientId: {
+            type: Object,
+            default: null
+        }
+    },
    data() {
        return {
            nom_client: "",
@@ -56,9 +62,28 @@ export default {
            adresse: "",
            nif_client: "",
            client_assujetti_tva: "",
-           loading: false
+           loading: false,
+           isEdit: false
        }
    },
+    watch: {
+        clientId: {
+            immediate: true,
+            handler(newVal) {
+            if (newVal) {
+                this.isEdit = true
+
+                this.nom_client = newVal.customer_name
+                this.number_phone = newVal.tel
+                this.adresse = newVal.customer_address
+                this.nif_client = newVal.customer_TIN
+                this.client_assujetti_tva = newVal.vat_customer_payer
+            } else {
+                this.isEdit = false
+            }
+            }
+        }
+    },
 
    methods: {
        async postInfo() {
@@ -73,30 +98,24 @@ export default {
 
            this.loading = true;
 
-           try {
-               const response = await apiClient.post('/clients/', form);
-
-               this.$store.commit("SET_CLIENTS", response.data);
-
-               console.log("Success :", response.data);
-
-               this.$emit('close');
-
-               localStorage.setItem("client", JSON.stringify(response.data));
-
-                if(response) {
-                    this.$toast.open({
-                        type: 'success',
-                        position: 'top',
-                        message: 'Client ajouté avec succès !'
-                    })
+           const request = this.isEdit ? axios.put(`clients/${this.clientId.id}/`, form, this.headers) : axios.post('clients/', form, )
+           
+           request 
+            .then(() => {
+                const msg = this.isEdit ? 'Infos du client modifiées avec succès' : 'Client ajouté avec succès'
+                this.$emit('success')
+                this.$emit('close')
+                if (this.$toast) {
+                    this.$toast.success(msg)
                 }
-
-           } catch (error) {
-               console.error("Erreur API :", error?.response?.data || error);
-           } finally {
-               this.loading = false;
-           }
+            })
+            .catch((error) => {
+                console.log(error) 
+                this.$toast.error(this.$getErrorMessage(error))
+            })
+            .finally(() => {
+                this.loading = false
+            })
        }
    }
 };
