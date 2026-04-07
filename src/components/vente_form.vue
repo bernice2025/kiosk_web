@@ -156,17 +156,17 @@ export default {
 
       this.loading = true;
 
-      // if (this.date) {
-      //   const dateChoisie = new Date(this.date);
-      //   const aujourdhui = new Date();
-      //   aujourdhui.setHours(0, 0, 0, 0); // minuit aujourd'hui
+      if (this.date) {
+        const dateChoisie = new Date(this.date);
+        const aujourdhui = new Date();
+        aujourdhui.setHours(0, 0, 0, 0); // minuit aujourd'hui
 
-      //   if (dateChoisie >= aujourdhui) {
-      //     this.$toast.error("La date de la facture doit être antérieure à aujourd'hui.");
-      //     this.loading = false;
-      //     return;
-      //   }
-      // }
+        if (dateChoisie >= aujourdhui) {
+          this.$toast.error("La date de la facture doit être antérieure à aujourd'hui.");
+          this.loading = false;
+          return;
+        }
+      }
 
       const venteData = {
         client: this.clientUUID,
