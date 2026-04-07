@@ -156,26 +156,26 @@ export default {
 
       this.loading = true;
 
-      if (this.date) {
-        const dateChoisie = new Date(this.date);
-        const aujourdhui = new Date();
-        aujourdhui.setHours(0, 0, 0, 0); // minuit aujourd'hui
+      // if (this.date) {
+      //   const dateChoisie = new Date(this.date);
+      //   const aujourdhui = new Date();
+      //   aujourdhui.setHours(0, 0, 0, 0); // minuit aujourd'hui
 
-        if (dateChoisie >= aujourdhui) {
-          this.$toast.error("La date de la facture doit être antérieure à aujourd'hui.");
-          this.loading = false;
-          return;
-        }
-      }
+      //   if (dateChoisie >= aujourdhui) {
+      //     this.$toast.error("La date de la facture doit être antérieure à aujourd'hui.");
+      //     this.loading = false;
+      //     return;
+      //   }
+      // }
 
       const venteData = {
         client: this.clientUUID,
         invoice_type: this.invoiceType,
-        date: this.date,
         produits: this.panier.map((p) => ({
           id: p.item.id,
           quantite: p.quantity,
         })),
+        ...(this.date ? { date: this.date } : {})
       };
 
       try {
@@ -187,8 +187,8 @@ export default {
           montant: this.montantPaye,
           type_paiement: "1", 
           details: "Paiement via formulaire de vente",
-          date: this.date,
           currency: "BIF", 
+          ...(this.date ? { date: this.date } : {})
         };
 
         await apiClient.post("payments/", paymentData);

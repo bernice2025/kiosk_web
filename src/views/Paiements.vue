@@ -22,7 +22,7 @@
               </td>
             </tr>
             <tr v-else-if="resultsPayments.length === 0">
-              <td colspan="6">Aucune donnée disponible.</td>
+              <td colspan="6">Aucune donnée présente.</td>
             </tr>
             <tr v-else v-for="(payment, index) in resultsPayments" :key="index">
               <td>{{ formatNumber(payment.montant) }} {{ payment.currency }}</td>

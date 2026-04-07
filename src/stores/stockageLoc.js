@@ -373,14 +373,14 @@ const store = createStore({
             }
         },
 
-        async fetchAllHistorique({ commit }) {
+        async fetchAllHistorique({ commit }, filters = {}) {
             try {
                 let url = "/ventes/";
                 let allResults = [];
                 let response;
 
                 while (url) {
-                    response = await apiClient.get(url);
+                    response = await apiClient.get(url, { params: filters });
                     allResults = [...allResults, ...response.data.results];
                     url = response.data.next;
                 }

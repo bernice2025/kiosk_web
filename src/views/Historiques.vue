@@ -1,7 +1,12 @@
 <template>
     <div class="ensemble">
-        <div class="form">
-            <Filter_form @search="updateFiltres" />
+        <div class="form" style="display:flex; align-items:center; gap:10px; justify-content: flex-end;">
+            <Filter_form @filters="updateFiltres" />
+            <button class="btn-filtrer" @click="showFiltersDialog = true">
+                <i class="fa-solid fa-sliders"></i>
+                Filtrer
+                <span v-if="hasActiveFilters" class="badge-filtres">{{ activeFiltersCount }}</span>
+            </button>
         </div>
 
         <div class="tabilation">
@@ -28,7 +33,7 @@
                         </tr>
 
                         <tr v-else-if="error">
-                            <td colspan="7" class="state-message error">
+                            <td colspan="7" class="state-message error" style="color: #dc2626;">
                                 <i class="fa-solid fa-triangle-exclamation"></i>
                                 {{ error }}
                             </td>
@@ -42,8 +47,10 @@
                         </tr>
 
                         <tr 
+                            v-else
                             v-for="vente in resultsVentes" 
                             :key="vente.id"
+                            @dblclick="openPayment(vente)"
                         >
                             <td>{{ vente?.created_by?.username || "—" }}</td>
                             <td>{{ vente?.client?.customer_name || "—" }}</td>
@@ -99,22 +106,6 @@
 
                 <div class="histo-dropdown__body">
                     <button 
-                        class="histo-dropdown__item histo-dropdown__item--facture"
-                        @click="openFactures(selectedDropdownVente); activeDropdown = null"
-                    >
-                        <span class="histo-dropdown__icon">
-                            <i class="fa-solid fa-file-invoice"></i>
-                        </span>
-                        <span class="histo-dropdown__text">
-                            <span class="histo-dropdown__title">Facture</span>
-                            <span class="histo-dropdown__sub">Voir la facture</span>
-                        </span>
-                        <i class="fa-solid fa-chevron-right histo-dropdown__arrow-right"></i>
-                    </button>
-
-                    <div class="histo-dropdown__divider"></div>
-
-                    <button 
                         class="histo-dropdown__item histo-dropdown__item--payment"
                         @click="openPayment(selectedDropdownVente); activeDropdown = null"
                     >
@@ -124,6 +115,22 @@
                         <span class="histo-dropdown__text">
                             <span class="histo-dropdown__title">Paiements</span>
                             <span class="histo-dropdown__sub">Gérer les paiements</span>
+                        </span>
+                        <i class="fa-solid fa-chevron-right histo-dropdown__arrow-right"></i>
+                    </button>
+
+                    <div class="histo-dropdown__divider"></div>
+
+                    <button 
+                        class="histo-dropdown__item histo-dropdown__item--facture"
+                        @click="openFactures(selectedDropdownVente); activeDropdown = null"
+                    >
+                        <span class="histo-dropdown__icon">
+                            <i class="fa-solid fa-file-invoice"></i>
+                        </span>
+                        <span class="histo-dropdown__text">
+                            <span class="histo-dropdown__title">Facture</span>
+                            <span class="histo-dropdown__sub">Voir la facture</span>
                         </span>
                         <i class="fa-solid fa-chevron-right histo-dropdown__arrow-right"></i>
                     </button>
@@ -244,6 +251,84 @@
         </div>
     </div>
 </Teleport>
+
+<Teleport to="body">
+    <div v-if="showFiltersDialog" class="dialog-overlay" @click.self="showFiltersDialog = false">
+        <div class="filters-dialog">
+
+            <div class="filters-dialog__header">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>Filtres</span>
+                </div>
+                <button class="filters-dialog__close" @click="showFiltersDialog = false">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="filters-dialog__body">
+
+                <div class="filters-section">
+                    <p class="filters-section__label">Montant payé</p>
+                    <div class="filters-row">
+                        <div class="filters-field">
+                            <label>Min</label>
+                            <input type="number" v-model="filters.payee__gte" placeholder="0" />
+                        </div>
+                        <div class="filters-field">
+                            <label>Max</label>
+                            <input type="number" v-model="filters.payee__lte" placeholder="999 999" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filters-section">
+                    <p class="filters-section__label">Prix total</p>
+                    <div class="filters-row">
+                        <div class="filters-field">
+                            <label>Min</label>
+                            <input type="number" v-model="filters.prix_total__gte" placeholder="0" />
+                        </div>
+                        <div class="filters-field">
+                            <label>Max</label>
+                            <input type="number" v-model="filters.prix_total__lte" placeholder="999 999" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filters-section">
+                    <p class="filters-section__label">Date de création</p>
+                    <div class="filters-row">
+                        <div class="filters-field">
+                            <label>Du</label>
+                            <input type="date" v-model="filters.created_at__gt" />
+                        </div>
+                        <div class="filters-field">
+                            <label>Au</label>
+                            <input type="date" v-model="filters.created_at__lt" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filters-section">
+                    <p class="filters-section__label">Créé par</p>
+                    <input type="text" v-model="filters.created_by" placeholder="Nom d'utilisateur..." class="filters-full-input" />
+                </div>
+
+            </div>
+
+            <div class="filters-dialog__footer">
+                <button class="filters-btn filters-btn--reset" @click="resetFilters">
+                    Réinitialiser
+                </button>
+                <button class="filters-btn filters-btn--apply" @click="applyFilters">
+                    <i class="fa-solid fa-check"></i> Appliquer
+                </button>
+            </div>
+
+        </div>
+    </div>
+</Teleport>
 </template>
 
 <script>
@@ -257,7 +342,7 @@ export default {
     data() {
         return {
             loading: false,
-            error: false,
+            error: null,
             show_table: false,
             selectedVente: null,
             selectedDropdownVente: null,
@@ -269,12 +354,24 @@ export default {
             motifAnnulation: "",
             annulError: "",
             annulLoading: false,
+            filters: {
+                payee__lte: "",
+                payee__gte: "",
+                prix_total__lte: "",
+                prix_total__gte: "",
+                created_at__lt: "",
+                created_at__gt: "",
+                date__lt: "",
+                date__gt: "",
+                created_by: ""
+            },
+            showFiltersDialog: false
         }
     },
 
     computed: {
         resultsVentes() {
-            const ventes = this.$store.getters.historique?.results || [];
+            const ventes = this.$store.state.ventes.results || [];
             if (!this.search_query) return ventes;
             const q = this.search_query.toLowerCase();
             return ventes.filter(v =>
@@ -283,6 +380,12 @@ export default {
                 v?.payee?.toString().includes(q) ||
                 v?.prix_total?.toString().includes(q)
             );
+        },
+        hasActiveFilters() {
+            return Object.values(this.filters).some(v => v !== "" && v !== null);
+        },
+        activeFiltersCount() {
+            return Object.values(this.filters).filter(v => v !== "" && v !== null).length;
         }
     },
 
@@ -291,25 +394,48 @@ export default {
             this.capital_show = true;
         },
 
+        buildQueryParams() {
+            const params = {};
+
+            Object.keys(this.filters).forEach(key => {
+                const value = this.filters[key];
+
+                if (value !== "" && value !== null && value !== undefined) {
+                    params[key] = value;
+                }
+            });
+
+            return params;
+        },
+
+        resetFilters() {
+            Object.keys(this.filters).forEach(k => this.filters[k] = "");
+            this.getData();
+            this.showFiltersDialog = false;
+        },
+        applyFilters() {
+            this.getData();
+            this.showFiltersDialog = false;
+        },
+
         getData() {
-            this.loading = true;
-            let url = 'ventes/';
-            let allResults = [];
-            const pageLoad = (link) => {
-                axios
-                    .get(link, this.headers)
-                    .then(res => {
-                        allResults = allResults.concat(res.data.results);
-                        if (res.data.next) {
-                            pageLoad(res.data.next);
-                        } else {
-                            this.$store.state.ventes = { results: allResults };
-                        }
-                    })
-                    .catch(err => console.log("ERREUR :", err))
-                    .finally(() => { this.loading = false; });
-            };
-            pageLoad(url);
+
+            this.loading = true
+            this.error = null
+
+            const params = this.buildQueryParams();
+            axios
+                .get('ventes/', { params: params, ...this.headers })
+                .then((resp) => {
+                    this.$store.state.ventes = resp.data
+                })
+                .catch((error) => {
+                    console.log("AN ERROR OCCURED :", error)
+                    this.error = "Erreur rencontrée lors du chargement des données"
+                })
+                .finally(() => {
+                    this.loading = false
+                })
         },
 
         openFactures(vente) {
@@ -335,7 +461,7 @@ export default {
                 .then((response) => {
                     console.log(response.data)
                     this.$toast.success('La vente est supprimée avec succès')
-                    this.getData
+                    this.getData()
                 })
                 .catch((error) => {
                     console.log(error)
@@ -451,15 +577,16 @@ export default {
     },
 
     async mounted() {
-        this.loading = true;
-        try {
-            await this.$store.dispatch('fetchAllHistorique');
-        } catch (e) {
-            console.error("Erreur chargement historique :", e);
-            this.error = true;
-        } finally {
-            this.loading = false;
-        }
+        // this.loading = true;
+        // try {
+        //     await this.$store.dispatch('fetchAllHistorique');
+        // } catch (e) {
+        //     console.error("Erreur chargement historique :", e);
+        //     this.error = true;
+        // } finally {
+        //     this.loading = false;
+        // }
+        this.getData();
     }
 }
 </script>
@@ -467,6 +594,118 @@ export default {
 <style src="@/style.css"></style>
 
 <style>
+.btn-filtrer {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0 14px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #374151;
+    white-space: nowrap;
+    transition: background .15s;
+}
+.btn-filtrer:hover { background: #f9fafb; }
+.badge-filtres {
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 1px 7px;
+    border-radius: 999px;
+}
+.filters-dialog {
+    background: #fff;
+    border-radius: 14px;
+    width: 100%;
+    max-width: 460px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: annul-pop .2s ease;
+}
+.filters-dialog__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1a1a2e;
+}
+.filters-dialog__close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #94a3b8;
+    font-size: 1rem;
+    padding: 4px;
+}
+.filters-dialog__body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    overflow-y: auto;
+    max-height: 70vh;
+}
+.filters-section { display: flex; flex-direction: column; gap: 8px; }
+.filters-section__label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin: 0;
+}
+.filters-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.filters-field { display: flex; flex-direction: column; gap: 4px; }
+.filters-field label { font-size: 0.78rem; color: #6b7280; }
+.filters-field input,
+.filters-full-input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color .2s;
+    color: #1a1a2e;
+}
+.filters-field input:focus,
+.filters-full-input:focus { border-color: #6366f1; }
+.filters-dialog__footer {
+    display: flex;
+    gap: 10px;
+    padding: 14px 20px;
+    border-top: 1px solid #f1f5f9;
+}
+.filters-btn {
+    flex: 1;
+    padding: 9px 0;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all .15s;
+}
+.filters-btn--reset { background: #f3f4f6; color: #374151; }
+.filters-btn--reset:hover { background: #e5e7eb; }
+.filters-btn--apply { background: #1a1a2e; color: #fff; flex: 2; }
+.filters-btn--apply:hover { background: #2d2d4e; }
 .envoi-obr {
     color: rgb(90, 167, 90);
 }

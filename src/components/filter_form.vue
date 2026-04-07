@@ -1,5 +1,5 @@
 <template>
-    <div class="input" v-if="route.name !='Point_de_vente'">
+    <div class="input" v-if="route.name !== 'Point_de_vente' && route.name !== 'Historiques'">
         <div class="nouveau">
             <i class="fa-solid fa-magnifying-glass"></i>
             <input type="text" placeholder="Cherchez ici..." v-model="query" @input="$emit('search', query)">

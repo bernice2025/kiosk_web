@@ -1,5 +1,5 @@
 <template>
-    <div class="layout">
+    <div class="layout" @click.self="$emit('close')">
         <div class="card-body">
             <div class="legend">
                 <div class="ajout">
