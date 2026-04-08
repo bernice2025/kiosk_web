@@ -51,6 +51,18 @@
       <Dialog_client @close="capital_show = false" @client-added="handleClientAdded" @success="fetchAllClients" :client-id="selectedItem"/>
     </div>
   </div>
+
+  <div v-if="deleteDialog" class="dialog-overlay" @click.self="deleteDialog = false">
+    <div class="dialog-box">
+      <h3>Confirmation</h3>
+      <p>Voulez-vous vraiment supprimer ce client ?</p>
+
+      <div class="dialog-actions">
+        <button class="cancel" @click="deleteDialog = false">Annuler</button>
+        <button class="confirm" @click="confirmDelete">Supprimer</button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -72,6 +84,8 @@ export default {
       error: null,
       search_query: "",
       selectedItem: null,
+      deleteDialog: false,
+      clientTodelete: null
     }
   },
 
@@ -110,18 +124,26 @@ export default {
       // Tu peux aussi passer les données au dialog pour édition
     },
     deleteClient(client) {
-      axios
-        .delete(`clients/${client.id}/`, this.headers)
-        .then((response) => {
-          this.$store.state.clients = response.data
-          this.$toast.success("Le client est supprimé avec succès")
-          this.fetchAllClients()
-        })
-        .catch((error) => {
-          console.log(error)
-          this.$toast.error(this.$getErrorMessage(error))
-        })
+      this.clientToDelete = client
+      this.deleteDialog = true
     },
+    confirmDelete() {
+  axios
+      .delete(`clients/${this.clientToDelete.id}/`, this.headers)
+      .then((response) => {
+        this.$store.state.clients = response.data
+        this.$toast.success("Le client est supprimé avec succès")
+        this.fetchAllClients()
+      })
+      .catch((error) => {
+        console.log(error)
+        this.$toast.error(this.$getErrorMessage(error))
+      })
+      .finally(() => {
+        this.deleteDialog = false
+        this.clientToDelete = null
+      })
+  },
 
     async handleClientAdded() {
       this.loading = true
@@ -165,16 +187,52 @@ button:first-child {
   background-color: #4CAF50;
   color: white;
   border: 1px solid #4CAF50;
+  border-radius: 5px;
 }
 
 button:last-child {
   background-color: red;
   color: white;
   border: 1px solid red;
-
+  border-radius: 5px;
 }
 .parent-btn {
   display: flex;
   gap: 5px;
+}
+.dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.dialog-box {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 300px;
+  text-align: center;
+}
+
+.dialog-actions {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.cancel {
+  background: gray;
+  color: white;
+}
+
+.confirm {
+  background: red;
+  color: white;
 }
 </style>
