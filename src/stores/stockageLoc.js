@@ -281,17 +281,25 @@ const store = createStore({
             }
         },
 
-        async fetchAllProduits({ commit }) {
+        async fetchAllProduits({ commit }, search = "") {
             try {
                 let url = "/produits/";
                 let allResults = [];
                 let response;
+                let isFirstPage = true;  // ← pour n'envoyer params qu'à la 1ère requête
 
                 while (url) {
-                    response = await apiClient.get(url);
+                    // Les URLs "next" de Django contiennent déjà ?search= dedans
+                    // donc on passe params seulement à la première requête
+                    response = isFirstPage
+                        ? await apiClient.get(url, { params: search ? { search } : {} })
+                        : await apiClient.get(url);  // url "next" est déjà complète
+
                     allResults = [...allResults, ...response.data.results];
                     url = response.data.next;
+                    isFirstPage = false;
                 }
+
                 commit("SET_PRODUITS", {
                     count: allResults.length,
                     next: null,

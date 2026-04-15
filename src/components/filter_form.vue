@@ -2,7 +2,7 @@
     <div class="input" v-if="route.name !== 'Point_de_vente' && route.name !== 'Historiques'">
         <div class="nouveau">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" placeholder="Cherchez ici..." v-model="query" @input="$emit('search', query)">
+            <input type="text" placeholder="Cherchez ici..." v-model="query" @input="onInput(query)">
         </div>
         <div class="ancien">
             <input type="date" v-model="field_search" @input="$emit('search', field_search)">
@@ -33,9 +33,18 @@ export default{
         return {
             text: "",
             query: "",
-            field_search: ""
+            field_search: "",
+            debounceTimer: null
         }
     },
+    methods: {
+        onInput(value) {
+            clearTimeout(this.debounceTimer);
+            this.debounceTimer = setTimeout(() => {
+                this.$emit('search', value);
+            }, 400)
+        },
+    }
 }
 </script>
 <style scoped>

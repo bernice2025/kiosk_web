@@ -1,7 +1,7 @@
 <template>
   <div class="ensemble">
     <div class="filter">
-      <Filter_form @open="addProductShow = true"  />
+      <Filter_form @open="addProductShow = true" @search="onSearch"  />
     </div>
 
     <div class="tabilation">
@@ -83,18 +83,35 @@ export default {
       error: null,
       editPriceShow: false,
       addProductShow: false,
+      searchQuerry: "",
     };
   },
 
   computed: {
     ...mapGetters(["produits"]),
     produitsFiltrés() {
+      // Plus de filtre côté client, le backend renvoie déjà les bons résultats
       return Array.isArray(this.produits?.results) ? this.produits.results : [];
     },
   },
 
   methods: {
+    // onSearch(value) {
+    //   this.searchQuerry = value
+    // },
     ...mapActions(["fetchAllProduits", "setProduitSelectionne"]),
+
+    async onSearch(value) {
+      this.loading = true;
+      this.error = null;
+      try {
+        await this.fetchAllProduits(value);   // ← passe la query au store
+      } catch {
+        this.error = "Erreur lors de la recherche";
+      } finally {
+        this.loading = false;
+      }
+    },
 
     voirStock(produit) {
       this.setProduitSelectionne(produit);

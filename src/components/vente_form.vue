@@ -10,50 +10,80 @@
         </h2>
       </div>
 
-      <div class="recherche">
-        <div class="search">
-          <input
-            type="text"
-            v-model="clientSearch"
-            placeholder="Cherchez un client"
-            @keyup.enter="forceSearch"
-          />
+      <div class="client-search-section">
+        <label class="search-label">Sélectionner un client</label>
+        <div class="recherche">
+          <div class="search">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input
+              type="text"
+              v-model="clientSearch"
+              placeholder="Tapez le nom du client..."
+              @keyup.enter="forceSearch"
+              class="search-input"
+            />
+          </div>
+
+          <button 
+            v-if="clientSearch" 
+            @click="clearSearch"
+            title="Réinitialiser"
+            class="btn-clear"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+
+          <button 
+            v-else
+            @click="forceSearch"
+            :disabled="!clientSearch.trim()"
+            title="Rechercher"
+            class="btn-search"
+          >
+            <i v-if="searchLoading" class="fa-solid fa-spinner fa-spin"></i>
+            <i v-else class="fa-solid fa-search"></i>
+          </button>
         </div>
 
-        <button 
-          v-if="clientSearch" 
-          @click="clearSearch"
-          title="Réinitialiser"
-          class="btn-clear"
-        >
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-
-        <button 
-          v-else
-          @click="forceSearch"
-          :disabled="!clientSearch.trim()"
-          title="Rechercher"
-        >
-          <i v-if="searchLoading" class="fa-solid fa-spinner fa-spin"></i>
-          <i v-else class="fa-solid fa-magnifying-glass"></i>
-        </button>
-      </div>
-
-      <div v-if="searchResults.length > 0" class="results-box">
-        <div
-          class="result-item"
-          v-for="client in searchResults"
-          :key="client.id"
-          @click="selectClient(client)"
-        >
-          {{ client.name || client.customer_name || "Client inconnu" }}
+        <div v-if="searchResults.length > 0" class="results-box">
+          <div class="results-header">
+            <span class="results-count">{{ searchResults.length }} résultat(s)</span>
+          </div>
+          <div
+            class="result-item"
+            v-for="client in searchResults"
+            :key="client.id || client.uuid"
+            @click="selectClient(client)"
+          >
+            <div class="result-icon">
+              <i class="fa-solid fa-user-circle"></i>
+            </div>
+            <div class="result-content">
+              <div class="result-name">
+                {{ client.name || client.customer_name || "Client inconnu" }}
+              </div>
+              <div class="result-meta" v-if="client.phone || client.email">
+                <span v-if="client.phone" class="meta-item">
+                  <i class="fa-solid fa-phone"></i> {{ client.phone }}
+                </span>
+                <span v-if="client.email" class="meta-item">
+                  <i class="fa-solid fa-envelope"></i> {{ client.email }}
+                </span>
+              </div>
+            </div>
+            <div class="result-select">
+              <i class="fa-solid fa-arrow-right"></i>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div v-else-if="clientSearch.trim() && !searchLoading && searchResults.length === 0" class="no-results">
-        <i class="fa-solid fa-inbox"></i>
-        <p>Aucun client trouvé</p>
+        <div v-else-if="clientSearch.trim() && !searchLoading && searchResults.length === 0" class="no-results">
+          <div class="no-results-icon">
+            <i class="fa-solid fa-inbox"></i>
+          </div>
+          <p class="no-results-text">Aucun client trouvé</p>
+          <p class="no-results-hint">Vérifiez l'orthographe du nom</p>
+        </div>
       </div>
 
       <div v-if="clientUUID" class="selected">
@@ -298,51 +328,87 @@ export default {
   /* position: relative; */
 }
 
+/* Client Search Section */
+.client-search-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.search-label {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 .recherche {
   display: flex;
   width: 100%;
-  border: 1px solid #ccc;
+  border: 2px solid #e0e0e0;
   border-radius: 6px;
-  background: white;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.recherche:focus-within {
+  border-color: #3498db;
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15);
 }
 
 .search {
-  width: 90%;
-  border-right: 1px solid #ccc;
+  width: 85%;
+  border-right: 2px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  padding-left: 8px;
+  position: relative;
 }
 
-.search input {
+.search-icon {
+  color: #95a5a6;
+  margin-right: 6px;
+  font-size: 0.8em;
+}
+
+.search-input {
   width: 100%;
-  padding: 10px 12px;
+  padding: 8px 10px;
   border: none;
   background: transparent;
-  font-size: 0.95em;
+  font-size: 0.9em;
   outline: none;
+  color: #2c3e50;
+  font-weight: 500;
 }
 
-.search input::placeholder {
-  color: #999;
+.search-input::placeholder {
+  color: #bdc3c7;
+  font-weight: 400;
 }
 
 .recherche button {
-  width: 10%;
+  width: 15%;
   border: none;
   background: transparent;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.2s;
-  color: #666;
+  transition: all 0.3s ease;
+  color: #7f8c8d;
+  font-size: 0.95em;
 }
 
 .recherche button:hover:not(:disabled) {
-  background-color: #f5f5f5;
+  background-color: #ecf0f1;
+  color: #2c3e50;
 }
 
 .recherche button:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
@@ -351,69 +417,182 @@ export default {
 }
 
 .btn-clear:hover {
-  background-color: #ffe6e0 !important;
+  background-color: #fadbd8;
+  color: #c0392b;
 }
 
+.btn-search {
+  color: #3498db;
+}
+
+.btn-search:hover:not(:disabled) {
+  background-color: #d6eaf8;
+  color: #2980b9;
+}
+
+/* Results Box */
 .results-box {
-  border: 1px solid #ddd;
-  max-height: 200px;
+  border: 2px solid #3498db;
+  max-height: 350px;
   overflow-y: auto;
-  padding: 8px 0;
   border-radius: 6px;
   background: white;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  margin-top: 4px;
+  box-shadow: 0 6px 20px rgba(52, 152, 219, 0.2);
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.results-header {
+  padding: 8px 12px;
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  color: white;
+  border-radius: 4px 4px 0 0;
+  border-bottom: 1px solid #2980b9;
+}
+
+.results-count {
+  font-size: 0.8em;
+  font-weight: 600;
+  letter-spacing: 0.3px;
 }
 
 .result-item {
-  padding: 10px 15px;
+  padding: 10px 12px;
   cursor: pointer;
-  transition: background-color 0.15s;
-  border-left: 3px solid transparent;
+  font-size: 0.9em;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #ecf0f1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.result-item:last-child {
+  border-bottom: none;
 }
 
 .result-item:hover {
-  background: #f8f9fa;
-  border-left-color: #3498db;
+  background: linear-gradient(135deg, #ecf0f1 0%, #d5dbdb 100%);
+  padding-left: 16px;
 }
 
+.result-icon {
+  flex-shrink: 0;
+  font-size: 1.1em;
+  color: #3498db;
+}
+
+.result-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.result-name {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 0.9em;
+}
+
+.result-meta {
+  display: flex;
+  gap: 10px;
+  font-size: 0.75em;
+  color: #7f8c8d;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.meta-item i {
+  color: #95a5a6;
+  font-size: 0.75em;
+}
+
+.result-select {
+  flex-shrink: 0;
+  color: #3498db;
+  font-size: 0.8em;
+  opacity: 0;
+  transition: all 0.2s ease;
+}
+
+.result-item:hover .result-select {
+  opacity: 1;
+}
+
+/* No Results */
 .no-results {
   text-align: center;
-  padding: 20px;
-  color: #999;
-  border: 1px dashed #ddd;
+  padding: 20px 15px;
+  color: #7f8c8d;
+  border: 2px dashed #bdc3c7;
   border-radius: 6px;
-  background: #fafafa;
-  margin-top: 4px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ecf0f1 100%);
+  animation: fadeIn 0.3s ease;
 }
 
-.no-results i {
-  font-size: 1.5em;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.no-results-icon {
+  font-size: 2em;
   margin-bottom: 8px;
-  display: block;
+  color: #bdc3c7;
 }
 
-.no-results p {
-  margin: 0;
+.no-results-text {
+  margin: 0 0 3px 0;
+  font-weight: 600;
+  color: #34495e;
   font-size: 0.9em;
+}
+
+.no-results-hint {
+  margin: 0;
+  font-size: 0.75em;
+  color: #95a5a6;
 }
 
 .selected {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 15px;
-  background: #d4edda;
-  border: 1px solid #c3e6cb;
+  padding: 10px 12px;
+  background: linear-gradient(135deg, #d4edda 0%, #c8e6c9 100%);
+  border: 2px solid #28a745;
   border-radius: 6px;
   color: #155724;
-  font-weight: 500;
-  margin-top: 10px;
+  font-weight: 600;
+  font-size: 0.9em;
+  margin-top: 8px;
+  animation: slideDown 0.3s ease;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.15);
 }
 
 .selected i {
   color: #28a745;
-  font-size: 1.2em;
+  font-size: 1.1em;
 }
 
 .invoice-select,

@@ -1,6 +1,6 @@
 <template>
     <div class="ensemble">
-        <div class="form" style="display:flex; align-items:center; gap:10px; justify-content: flex-end;">
+        <div class="form" style="display:flex; align-items:center; gap:10px; justify-content: space-between;">
             <Filter_form @filters="updateFiltres" />
             <button class="btn-filtrer" @click="showFiltersDialog = true">
                 <i class="fa-solid fa-sliders"></i>
@@ -419,23 +419,41 @@ export default {
         },
 
         getData() {
-
-            this.loading = true
-            this.error = null
+            this.loading = true;
+            this.error = null;
 
             const params = this.buildQueryParams();
-            axios
-                .get('ventes/', { params: params, ...this.headers })
-                .then((resp) => {
-                    this.$store.state.ventes = resp.data
-                })
-                .catch((error) => {
-                    console.log("AN ERROR OCCURED :", error)
-                    this.error = "Erreur rencontrée lors du chargement des données"
-                })
-                .finally(() => {
-                    this.loading = false
-                })
+            const allResults = [];
+
+            const fetchPage = (url, isFirstPage = true) => {
+                const request = isFirstPage
+                    ? axios.get(url, { params, ...this.headers })
+                    : axios.get(url, { ...this.headers });
+
+                request
+                    .then((response) => {
+                        allResults.push(...response.data.results);
+
+                        if (response.data.next) {
+                            // Il reste des pages → on continue
+                            fetchPage(response.data.next, false);
+                        } else {
+                            // Dernière page → on stocke tout
+                            this.$store.state.ventes = {
+                                ...response.data,
+                                results: allResults,
+                            };
+                            this.loading = false;
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("AN ERROR OCCURED :", error);
+                        this.error = "Erreur rencontrée lors du chargement des données";
+                        this.loading = false;
+                    });
+            };
+
+            fetchPage('ventes/');
         },
 
         openFactures(vente) {
@@ -598,10 +616,9 @@ export default {
     display: flex;
     align-items: center;
     gap: 7px;
-    padding: 0 14px;
-    height: 36px;
-    border-radius: 8px;
-    border: 1px solid #e5e7eb;
+    padding: 7px 14px;
+    border-radius: 5px;
+    border: 1px solid #708abe;
     background: #fff;
     cursor: pointer;
     font-size: 0.85rem;
