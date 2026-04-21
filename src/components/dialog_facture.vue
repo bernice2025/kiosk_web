@@ -450,7 +450,6 @@ return num.toString();
     }
   },
   mounted() {
-    this.getData();
     this.getKiosks();
   }
 }
