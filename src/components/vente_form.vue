@@ -556,10 +556,10 @@ export default {
 }
 
 /* Scrollbar custom */
-.form-body::-webkit-scrollbar { width: 4px; }
-.form-body::-webkit-scrollbar-track { background: transparent; }
-.form-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-.form-body::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+.form-body::-webkit-scrollbar { width: 6px; }
+.form-body::-webkit-scrollbar-track { background: var(--surface-alt); border-radius: 4px; }
+.form-body::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+/* .form-body::-webkit-scrollbar-thumb:hover { background: var(--primary-dark); } */
 
 /* ============================================================
    SECTIONS

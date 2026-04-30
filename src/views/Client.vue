@@ -1,7 +1,7 @@
 <template>
   <div class="ensemble">
     <div class="filter">
-      <Filter_form @click="openDialog" @search="updateFilters"/>
+      <Filter_form @open="capital_show = true" @search="updateFilters"/>
     </div>
 
     <div class="tabilation">
@@ -191,9 +191,9 @@ button:first-child {
 }
 
 button:last-child {
-  background-color: red;
+  background-color: rgb(219, 0, 0);
   color: white;
-  border: 1px solid red;
+  border: 1px solid rgb(219, 0, 0);
   border-radius: 5px;
 }
 .parent-btn {

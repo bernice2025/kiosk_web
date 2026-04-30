@@ -101,6 +101,10 @@ export default {
     // },
     ...mapActions(["fetchAllProduits", "setProduitSelectionne"]),
 
+    openDialog () {
+      this.addProductShow = true
+    },
+
     async onSearch(value) {
       this.loading = true;
       this.error = null;

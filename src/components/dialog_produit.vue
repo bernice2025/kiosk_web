@@ -1,6 +1,6 @@
 <template>
-  <div class="overlay" @click.self="$emit('close')">
-    <div class="layout">
+  <div class="overlay">
+    <div class="layout" @click.self="$emit('close')">
       <div class="card-body">
         <div class="legend">
           <div class="ajout">
