@@ -83,15 +83,15 @@ export default {
 
     methods: {
         async postInfo() {
-            if (!this.montant || Number(this.montant) <= 0) {
-                alert("Veuillez entrer un montant valide");
-                return;
-            }
+            // if (!this.montant || Number(this.montant) <= 0) {
+            //     alert("Veuillez entrer un montant valide");
+            //     return;
+            // }
 
-            if (!this.type_paiement) {
-                alert("Veuillez choisir un type de paiement");
-                return;
-            }
+            // if (!this.type_paiement) {
+            //     alert("Veuillez choisir un type de paiement");
+            //     return;
+            // }
 
             const form = {
                 montant: Number(this.montant),

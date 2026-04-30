@@ -114,7 +114,7 @@ export default {
     nouveauPaiement() {
       if (this.venteTotal === this.ventePaye) {
         this.dialog_show = false;
-        alert("Paiement déjà effectué");
+        alert("Le paiement est déjà effectué");
       } else {
         this.dialog_show = true;
       }
