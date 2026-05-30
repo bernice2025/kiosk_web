@@ -169,6 +169,7 @@
               placeholder="0"
               min="0"
               class="form-input"
+              @wheel="$event.target.blur()"
             />
             <span class="input-suffix">Fbu</span>
           </div>
